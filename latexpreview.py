@@ -91,13 +91,6 @@ class LogWindow(Gtk.Window):
 
 class MainWindow:
     def __init__(self):
-        # load up packages
-        try:
-            with open(os.path.join(PATH, ".packages")) as f:
-                self.packages = [line for line in f]
-        except FileNotFoundError:
-            self.packages = []
-
         # load up builder
         self.builder = Gtk.Builder()
         try: self.builder.add_from_file(
@@ -114,6 +107,7 @@ class MainWindow:
             "on_resolution_changed": self.on_resolution_changed,
             "on_preview": self.on_preview,
             "on_log": self.on_log,
+            "on_packages": self.on_packages,
             "on_quit": self.on_quit
         }
 
@@ -121,11 +115,29 @@ class MainWindow:
         self.resolution_spin = self.builder.get_object("resolution_spin")
         self.editor = self.builder.get_object("editor")
         self.preview = self.builder.get_object("preview")
+        self.packages_pop = self.builder.get_object("packages_pop")
 
         # check if xclip is installed
         r = subprocess.call("command -v xclip >> /dev/null", shell=True)
         if r:
             self.builder.get_object("cpy_btn").set_sensitive(False)
+
+        # initialize the packages pop-over
+        renderer = Gtk.CellRendererText()
+        renderer.set_property("editable", True)
+        column = Gtk.TreeViewColumn("packages", renderer, text=0)
+        self.packages = Gtk.ListStore(str)
+        packages_tree = Gtk.TreeView(model=self.packages)
+        packages_tree.append_column(column)
+        self.packages_pop.add(packages_tree)
+
+        # load up packages
+        try:
+            with open(os.path.join(PATH, ".packages")) as f:
+                for line in f: self.packages.append([line[:-1]])
+        except FileNotFoundError:
+            pass
+        self.packages.append(["<add a LaTeX package>"])
 
         self.clipboard = []
         self.builder.get_object('window').show_all()
@@ -151,7 +163,7 @@ class MainWindow:
         # generate the latex
         with open('latexpreview.tex', 'w') as tex:
             buff = self.editor.get_buffer()
-            tex.write(tex_head(self.packages) + buff.get_text(
+            tex.write(tex_head([row[0] for row in self.packages]) + buff.get_text(
                 buff.get_start_iter(), buff.get_end_iter(), True
             ) + TEX_FOOT)
         # build the latex
@@ -221,6 +233,9 @@ class MainWindow:
     def on_log(self, widget):
         w = LogWindow()
         w.show_all()
+
+    def on_packages(self, widget):
+        self.packages_pop.show_all()
 
 
 if __name__ == '__main__':

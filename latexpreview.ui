@@ -22,6 +22,11 @@
     <property name="can_focus">False</property>
     <property name="icon_name">edit-copy</property>
   </object>
+  <object class="GtkImage" id="pack_img">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">insert-object-symbolic</property>
+  </object>
   <object class="GtkImage" id="save_img">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -75,6 +80,19 @@
               </packing>
             </child>
           </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="pack_btn">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">pack_img</property>
+            <signal name="clicked" handler="on_packages" swapped="no"/>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
         </child>
       </object>
     </child>
@@ -182,6 +200,13 @@
           </packing>
         </child>
       </object>
+    </child>
+  </object>
+  <object class="GtkPopover" id="packages_pop">
+    <property name="can_focus">False</property>
+    <property name="relative_to">pack_btn</property>
+    <child>
+      <placeholder/>
     </child>
   </object>
 </interface>
