@@ -251,9 +251,10 @@ class MainWindow:
             if idx == len(self.packages)-1: return
             self.packages.remove(it)
             return
-        self.packages.set_value(it, 0, new_str)
         if idx == len(self.packages)-1:
+            if new_str == "<add a LaTeX package>": return
             self.packages.append(["<add a LaTeX package>"])
+        self.packages.set_value(it, 0, new_str)
 
     def on_resolution_changed(self, widget):
         self.generate()
