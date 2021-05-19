@@ -62,7 +62,7 @@ def strip(string):
     LaTeX doesn't like empty lines at the start and end of mathematical
     expressions for some reason, so we must strip those away.
     """
-    if not string: return string
+    if not string: return '\pi^2=g'
     while string[-1] == '\n':
         string = string[:-1]
     while string[0] == '\n':
