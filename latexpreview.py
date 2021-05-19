@@ -62,6 +62,7 @@ def strip(string):
     LaTeX doesn't like empty lines at the start and end of mathematical
     expressions for some reason, so we must strip those away.
     """
+    if not string: return string
     while string[-1] == '\n':
         string = string[:-1]
     while string[0] == '\n':
@@ -247,7 +248,7 @@ class MainWindow:
     def refresh_packages(self, renderer, path, new_str):
         idx = int(path)
         it = self.packages.get_iter_from_string(path)
-        if new_str.isspace() or new_str == '':
+        if new_str.isspace() or not new_str:
             if idx == len(self.packages)-1: return
             self.packages.remove(it)
             return
