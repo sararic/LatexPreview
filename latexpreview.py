@@ -57,6 +57,18 @@ def call(command: list, stdin = ""):
     return None
 
 
+def strip(string):
+    """
+    LaTeX doesn't like empty lines at the start and end of mathematical
+    expressions for some reason, so we must strip those away.
+    """
+    while string[-1] == '\n':
+        string = string[:-1]
+    while string[0] == '\n':
+        string = string[1:]
+    return string
+
+
 def error_dialog(e):
     dialog = Gtk.MessageDialog(
         parent                 = None,
@@ -165,8 +177,8 @@ class MainWindow:
         with open('latexpreview.tex', 'w') as tex:
             buff = self.editor.get_buffer()
             tex.write(tex_head(
-                [row[0] for row in self.packages][:-1]) + buff.get_text(
-                buff.get_start_iter(), buff.get_end_iter(), True
+                [row[0] for row in self.packages][:-1]) + strip(buff.get_text(
+                buff.get_start_iter(), buff.get_end_iter(), True)
             ) + TEX_FOOT)
         # build the latex
         e = call(latex)
