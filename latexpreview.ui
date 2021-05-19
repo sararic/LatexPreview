@@ -86,6 +86,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Specify extra LaTeX packages</property>
             <property name="image">pack_img</property>
             <signal name="clicked" handler="on_packages" swapped="no"/>
           </object>

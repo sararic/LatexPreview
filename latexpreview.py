@@ -125,6 +125,7 @@ class MainWindow:
         # initialize the packages pop-over
         renderer = Gtk.CellRendererText()
         renderer.set_property("editable", True)
+        renderer.connect("edited", self.refresh_packages)
         column = Gtk.TreeViewColumn("packages", renderer, text=0)
         self.packages = Gtk.ListStore(str)
         packages_tree = Gtk.TreeView(model=self.packages)
@@ -163,7 +164,8 @@ class MainWindow:
         # generate the latex
         with open('latexpreview.tex', 'w') as tex:
             buff = self.editor.get_buffer()
-            tex.write(tex_head([row[0] for row in self.packages]) + buff.get_text(
+            tex.write(tex_head(
+                [row[0] for row in self.packages][:-1]) + buff.get_text(
                 buff.get_start_iter(), buff.get_end_iter(), True
             ) + TEX_FOOT)
         # build the latex
@@ -225,10 +227,21 @@ class MainWindow:
             s = ''
             for row in self.packages: s += row[0]+'\n'
             with open(os.path.join(PATH, ".packages"), 'w') as f:
-                f.write(s[:s.find('<')-1])
+                f.write(s[:s.find('<')])
         # kill the running xclips and quit Gtk
         for t in self.clipboard: t.terminate()
         Gtk.main_quit()
+
+    def refresh_packages(self, renderer, path, new_str):
+        idx = int(path)
+        it = self.packages.get_iter_from_string(path)
+        if new_str.isspace() or new_str == '':
+            if idx == len(self.packages)-1: return
+            self.packages.remove(it)
+            return
+        self.packages.set_value(it, 0, new_str)
+        if idx == len(self.packages)-1:
+            self.packages.append(["<add a LaTeX package>"])
 
     def on_resolution_changed(self, widget):
         self.generate()
