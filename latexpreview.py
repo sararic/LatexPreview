@@ -220,6 +220,12 @@ class MainWindow:
         self.clipboard.append(selection)
 
     def on_quit(self, widget):
+        # write the new packages to disk
+        if len(self.packages) > 1:
+            s = ''
+            for row in self.packages: s += row[0]+'\n'
+            with open(os.path.join(PATH, ".packages"), 'w') as f:
+                f.write(s[:s.find('<')-1])
         # kill the running xclips and quit Gtk
         for t in self.clipboard: t.terminate()
         Gtk.main_quit()
