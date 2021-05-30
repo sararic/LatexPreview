@@ -46,13 +46,20 @@ def tex_head(packages):
 
 def call(command: list, stdin = ""):
     """Call an external program"""
+    print("Calling subprocess:", end=' ')
+    for s in command:
+        print(s, end=' ')
+    print('')
     try:
         subprocess.check_output(
             command, stderr=subprocess.STDOUT, input=stdin
         )
     except OSError as e:
+        print("Failed to run {}:\n{}".format(command[0], e))
         error_dialog("Failed to run {}:\n{}".format(command[0], e))
     except subprocess.CalledProcessError as e:
+        print("{} terminated with exit status {}:\n{}".format(
+            e.cmd[0], e.returncode, e.output.decode("ascii")))
         return e
     return None
 
@@ -91,12 +98,17 @@ class LogWindow(Gtk.Window):
         self.log.set_editable(False)
         self.sw.set_size_request(750,400)
         buff = Gtk.TextBuffer()
+
         try:
             with open('latexpreview.log', 'r') as file:
                 buff.set_text(file.read())
             self.log.set_buffer(buff)
         except FileNotFoundError:
-            pass
+            print("File not found: /tmp/latexpreview.log (This is fine)")
+        except OSError as e:
+            print(f"Could not read from /tmp/latexpreview.log: {e}")
+            error_dialog(
+                f"Could not read from /tmp/latexpreview.log: {e}")
 
         self.sw.add(self.log)
         self.add(self.sw)
@@ -146,11 +158,15 @@ class MainWindow:
         self.packages_pop.add(packages_tree)
 
         # load up packages
+        file_name = os.path.join(PATH, ".packages")
         try:
-            with open(os.path.join(PATH, ".packages")) as f:
+            with open(file_name) as f:
                 for line in f: self.packages.append([line[:-1]])
         except FileNotFoundError:
-            pass
+            print(f"File not found: {file_name} (This is fine)")
+        except OSError as e:
+            print(f"Could not read from {file_name}: {e}")
+            error_dialog(f"Could not read from {file_name}: {e}")
         self.packages.append(["<add a LaTeX package>"])
 
         self.clipboard = []
@@ -174,19 +190,19 @@ class MainWindow:
             str(self.resolution_spin.get_value()),
             '-T', 'tight', '-bg', 'Transparent', '-o', 'latexpreview.gif'
         ]
-        # generate the latex
+        print("Generating /tmp/latexpreview.tex")
         with open('latexpreview.tex', 'w') as tex:
             buff = self.editor.get_buffer()
             tex.write(tex_head(
                 [row[0] for row in self.packages][:-1]) + strip(buff.get_text(
                 buff.get_start_iter(), buff.get_end_iter(), True)
             ) + TEX_FOOT)
-        # build the latex
+        print("Building /tmp/latexpreview.tex")
         e = call(latex)
         if e is not None:
             self.preview.set_from_icon_name("emblem-unreadable", 6)
             return False
-        # convert to image
+        print("converting /tmp/latexpreview.dvi to /tmp/latexpreview.gif")
         e = call(dvigif)
         if e is not None:
             error_dialog("{} terminated with exit status {}:\n{}".format(
@@ -211,9 +227,9 @@ class MainWindow:
         if response == Gtk.ResponseType.OK:
             file_path = dialog.get_filename()
             os.rename('/tmp/latexpreview.gif', file_path)
+        print(f"Moved /tmp/latexpreview.gif to {file_path}")
 
         dialog.destroy()
-
         os.chdir('/tmp/')
 
     def on_copy(self, widget):
@@ -232,17 +248,26 @@ class MainWindow:
 
         selection = Process(target=copy)
         selection.start()
+        print("Copied /tmp/latexpreview.gif to clipboard")
         self.clipboard.append(selection)
 
     def on_quit(self, widget):
         # write the new packages to disk
         if len(self.packages) > 1:
+            file_name = os.path.join(PATH, '.packages')
+            print(f"Writing packages to {file_name}")
             s = ''
             for row in self.packages: s += row[0]+'\n'
-            with open(os.path.join(PATH, ".packages"), 'w') as f:
-                f.write(s[:s.find('<')])
+            try:
+                with open(file_name, 'w') as f:
+                    f.write(s[:s.find('<')])
+            except OSError as e:
+                print(f"Couldn't write to {file_name}:\n{e}")
+                error_dialog(f"Couldn't write to {file_name}:\n{e}")
         # kill the running xclips and quit Gtk
-        for t in self.clipboard: t.terminate()
+        for t in self.clipboard:
+            print("Killing running instance of xclip")
+            t.terminate()
         Gtk.main_quit()
 
     def refresh_packages(self, renderer, path, new_str):
@@ -272,5 +297,7 @@ class MainWindow:
 
 
 if __name__ == '__main__':
+    print("Starting Latex Preview")
     w = MainWindow()
     if w.good: Gtk.main()
+    print("Quitting Latex Preview")
