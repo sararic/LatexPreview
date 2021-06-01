@@ -323,6 +323,7 @@ if __name__ == '__main__':
     print("Starting Latex Preview")
     try:
         with open(CONF_FILE, 'r') as f:
+            print(f"Loading application state from {CONF_FILE}")
             w = MainWindow.from_json(f)
     except FileNotFoundError:
         print(f"File not found: {CONF_FILE} (This is fine)")
