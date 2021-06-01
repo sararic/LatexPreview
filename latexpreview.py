@@ -5,15 +5,18 @@ preview it, copy it to the clipboard, or save it.
 """
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 from gi.repository.GLib import Error as GLibError
 
 import os
 import subprocess
 from multiprocessing import Process
+import json
 
 CWD = os.getcwd()
 PATH = os.path.dirname(os.path.realpath(__file__))
+CONF_FILE = os.path.join(PATH, '.conf.json')
+ADD_PACK_MSG = "<add a LaTeX package>"
 os.chdir('/tmp/')
 
 TEX_FOOT = r"""
@@ -158,18 +161,7 @@ class MainWindow:
         packages_tree = Gtk.TreeView(model=self.packages)
         packages_tree.append_column(column)
         self.packages_pop.add(packages_tree)
-
-        # load up packages
-        file_name = os.path.join(PATH, ".packages")
-        try:
-            with open(file_name) as f:
-                for line in f: self.packages.append([line[:-1]])
-        except FileNotFoundError:
-            print(f"File not found: {file_name} (This is fine)")
-        except OSError as e:
-            print(f"Could not read from {file_name}: {e}")
-            error_dialog(f"Could not read from {file_name}: {e}")
-        self.packages.append(["<add a LaTeX package>"])
+        self.packages.append([ADD_PACK_MSG])
 
         self.clipboard = []
         self.builder.get_object('window').show_all()
@@ -194,7 +186,6 @@ class MainWindow:
             '-fg', f'rgb {color.red} {color.green} {color.blue}',
             '-T', 'tight', '-bg', 'Transparent', '-o', 'latexpreview.gif'
         ]
-        print(self.color_btn.get_rgba())
         print("Generating /tmp/latexpreview.tex")
         with open('latexpreview.tex', 'w') as tex:
             buff = self.editor.get_buffer()
@@ -258,17 +249,10 @@ class MainWindow:
 
     def on_quit(self, widget):
         # write the new packages to disk
-        if len(self.packages) > 1:
-            file_name = os.path.join(PATH, '.packages')
-            print(f"Writing packages to {file_name}")
-            s = ''
-            for row in self.packages: s += row[0]+'\n'
-            try:
-                with open(file_name, 'w') as f:
-                    f.write(s[:s.find('<')])
-            except OSError as e:
-                print(f"Couldn't write to {file_name}:\n{e}")
-                error_dialog(f"Couldn't write to {file_name}:\n{e}")
+        print(f"Saving application state to {CONF_FILE}")
+        with open(CONF_FILE, 'w') as f:
+            self.to_json(f)
+
         # kill the running xclips and quit Gtk
         for t in self.clipboard:
             print("Killing running instance of xclip")
@@ -283,8 +267,8 @@ class MainWindow:
             self.packages.remove(it)
             return
         if idx == len(self.packages)-1:
-            if new_str == "<add a LaTeX package>": return
-            self.packages.append(["<add a LaTeX package>"])
+            if new_str == ADD_PACK_MSG: return
+            self.packages.append([ADD_PACK_MSG])
         self.packages.set_value(it, 0, new_str)
 
     def on_resolution_changed(self, widget):
@@ -303,9 +287,45 @@ class MainWindow:
     def on_packages(self, widget):
         self.packages_pop.show_all()
 
+    def to_json(self, file):
+        d = {}
+        buff = self.editor.get_buffer()
+        d['code'] = buff.get_text(
+            buff.get_start_iter(), buff.get_end_iter(), True)
+        d['resolution'] = self.resolution_spin.get_value()
+        color = self.color_btn.get_rgba()
+        d['color'] = {
+            'red': color.red,
+            'green': color.green,
+            'blue': color.blue
+        }
+        d['packages'] = [row[0] for row in self.packages]
+        d['packages'] = d['packages'][:-1]
+        json.dump(d, file)
+
+    @classmethod
+    def from_json(cls, file):
+        w = cls()
+        buffer = Gtk.TextBuffer()
+        d = json.load(file)
+
+        buffer.set_text(d['code'])
+        w.editor.set_buffer(buffer)
+        w.color_btn.set_rgba(Gdk.RGBA(**d['color']))
+        w.resolution_spin.set_value(d['resolution'])
+        for p in reversed(d['packages']):
+            w.packages.prepend([p])
+
+        return w
+
 
 if __name__ == '__main__':
     print("Starting Latex Preview")
-    w = MainWindow()
+    try:
+        with open(CONF_FILE, 'r') as f:
+            w = MainWindow.from_json(f)
+    except FileNotFoundError:
+        print(f"File not found: {CONF_FILE} (This is fine)")
+        w = MainWindow()
     if w.good: Gtk.main()
     print("Quitting Latex Preview")
