@@ -11,7 +11,7 @@ The following packages are _required_.
 * `python3`
 * `python3-gi`
 * an installation of `latex`
-* `dvigif` (`dvipng`)
+* `dvipng`
 
 The following package is necessary for copying the image to clipboard
 and use the clipboard across multiple applications. It is however not
