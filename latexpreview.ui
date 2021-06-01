@@ -27,6 +27,12 @@
     <property name="can_focus">False</property>
     <property name="icon_name">insert-object-symbolic</property>
   </object>
+  <object class="GtkPopover" id="packages_pop">
+    <property name="can_focus">False</property>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
   <object class="GtkImage" id="save_img">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -82,13 +88,38 @@
           </object>
         </child>
         <child>
-          <object class="GtkButton" id="pack_btn">
+          <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Specify extra LaTeX packages</property>
-            <property name="image">pack_img</property>
-            <signal name="clicked" handler="on_packages" swapped="no"/>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkColorButton" id="color_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="rgba">rgb(0,0,0)</property>
+                <signal name="color-set" handler="on_color_set" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="pack_btn">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Specify extra LaTeX packages</property>
+                <property name="image">pack_img</property>
+                <signal name="clicked" handler="on_packages" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="pack_type">end</property>
@@ -201,13 +232,6 @@
           </packing>
         </child>
       </object>
-    </child>
-  </object>
-  <object class="GtkPopover" id="packages_pop">
-    <property name="can_focus">False</property>
-    <property name="relative_to">pack_btn</property>
-    <child>
-      <placeholder/>
     </child>
   </object>
 </interface>

@@ -133,6 +133,7 @@ class MainWindow:
             "on_preview": self.on_preview,
             "on_log": self.on_log,
             "on_packages": self.on_packages,
+            "on_color_set": self.on_color_set,
             "on_quit": self.on_quit
         }
 
@@ -140,6 +141,7 @@ class MainWindow:
         self.resolution_spin = self.builder.get_object("resolution_spin")
         self.editor = self.builder.get_object("editor")
         self.preview = self.builder.get_object("preview")
+        self.color_btn = self.builder.get_object("color_btn")
         self.packages_pop = self.builder.get_object("packages_pop")
 
         # check if xclip is installed
@@ -183,13 +185,16 @@ class MainWindow:
             "-interaction=nonstopmode",
             "latexpreview.tex"
         ]
-        dvigif = [
-            "dvigif",
+        color = self.color_btn.get_rgba()
+        dvipng = [
+            "dvipng",
             "latexpreview.dvi",
             '-D',
             str(self.resolution_spin.get_value()),
+            '-fg', f'rgb {color.red} {color.green} {color.blue}',
             '-T', 'tight', '-bg', 'Transparent', '-o', 'latexpreview.gif'
         ]
+        print(self.color_btn.get_rgba())
         print("Generating /tmp/latexpreview.tex")
         with open('latexpreview.tex', 'w') as tex:
             buff = self.editor.get_buffer()
@@ -203,7 +208,7 @@ class MainWindow:
             self.preview.set_from_icon_name("emblem-unreadable", 6)
             return False
         print("converting /tmp/latexpreview.dvi to /tmp/latexpreview.gif")
-        e = call(dvigif)
+        e = call(dvipng)
         if e is not None:
             error_dialog("{} terminated with exit status {}:\n{}".format(
                 e.cmd[0], e.returncode, e.output.decode("ascii")))
@@ -291,6 +296,9 @@ class MainWindow:
     def on_log(self, widget):
         w = LogWindow()
         w.show_all()
+
+    def on_color_set(self, widget):
+        self.generate()
 
     def on_packages(self, widget):
         self.packages_pop.show_all()
