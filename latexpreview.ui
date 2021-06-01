@@ -27,12 +27,6 @@
     <property name="can_focus">False</property>
     <property name="icon_name">insert-object-symbolic</property>
   </object>
-  <object class="GtkPopover" id="packages_pop">
-    <property name="can_focus">False</property>
-    <child>
-      <placeholder/>
-    </child>
-  </object>
   <object class="GtkImage" id="save_img">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -233,6 +227,13 @@
           </packing>
         </child>
       </object>
+    </child>
+  </object>
+  <object class="GtkPopover" id="packages_pop">
+    <property name="can_focus">False</property>
+    <property name="relative_to">pack_btn</property>
+    <child>
+      <placeholder/>
     </child>
   </object>
 </interface>
