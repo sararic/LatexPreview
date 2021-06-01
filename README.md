@@ -35,7 +35,8 @@ $ python3 latexpreview.py
 ## Use
 
 Every control is pretty much intuitive. Hover the mouse over a button
-to know its shortcut and what it does.
+to know its shortcut and what it does. You can resize the preview, 
+change its color, copy the image to clipboard or save it.
 
 You can also add __extra packages__ for latex that will be used by the
 program (c.f. image above).
