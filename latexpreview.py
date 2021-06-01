@@ -26,7 +26,7 @@ TEX_FOOT = r"""
 
 XCLIP_STRING = b"""x-special/nautilus-clipboard
 copy
-file:///tmp/latexpreview.gif
+file:///tmp/latexpreview.png
 """
 
 
@@ -184,7 +184,7 @@ class MainWindow:
             '-D',
             str(self.resolution_spin.get_value()),
             '-fg', f'rgb {color.red} {color.green} {color.blue}',
-            '-T', 'tight', '-bg', 'Transparent', '-o', 'latexpreview.gif'
+            '-T', 'tight', '-bg', 'Transparent', '-o', 'latexpreview.png'
         ]
         print("Generating /tmp/latexpreview.tex")
         with open('latexpreview.tex', 'w') as tex:
@@ -198,13 +198,13 @@ class MainWindow:
         if e is not None:
             self.preview.set_from_icon_name("emblem-unreadable", 6)
             return False
-        print("converting /tmp/latexpreview.dvi to /tmp/latexpreview.gif")
+        print("converting /tmp/latexpreview.dvi to /tmp/latexpreview.png")
         e = call(dvipng)
         if e is not None:
             error_dialog("{} terminated with exit status {}:\n{}".format(
                 e.cmd[0], e.returncode, e.output.decode("ascii")))
         # update preview
-        self.preview.set_from_file('latexpreview.gif')
+        self.preview.set_from_file('latexpreview.png')
         return True
 
     def on_save(self, widget):
@@ -215,15 +215,15 @@ class MainWindow:
         dialog = Gtk.FileChooserDialog(title="Please choose a file",
             action=Gtk.FileChooserAction.SAVE)
 
-        dialog.add_filter(self.builder.get_object('GIF'))
+        dialog.add_filter(self.builder.get_object('PNG'))
         dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
         dialog.add_button(Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
 
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             file_path = dialog.get_filename()
-            os.rename('/tmp/latexpreview.gif', file_path)
-        print(f"Moved /tmp/latexpreview.gif to {file_path}")
+            os.rename('/tmp/latexpreview.png', file_path)
+        print(f"Moved /tmp/latexpreview.png to {file_path}")
 
         dialog.destroy()
         os.chdir('/tmp/')
@@ -244,7 +244,7 @@ class MainWindow:
 
         selection = Process(target=copy)
         selection.start()
-        print("Copied /tmp/latexpreview.gif to clipboard")
+        print("Copied /tmp/latexpreview.png to clipboard")
         self.clipboard.append(selection)
 
     def on_quit(self, widget):
