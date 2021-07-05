@@ -23,11 +23,6 @@ $$
 \end{document}
 """
 
-CPY_STRING = """x-special/nautilus-clipboard
-copy
-file:///tmp/latexpreview.png
-"""
-
 
 def tex_head(packages):
     """
@@ -237,7 +232,6 @@ class MainWindow:
 
     def on_copy(self, widget):
         if not self.generate(): return
-        self.clipboard.set_text(CPY_STRING, -1)
         self.clipboard.set_image(self.preview.get_pixbuf())
         print("Copied /tmp/latexpreview.png to clipboard")
 
