@@ -1,7 +1,7 @@
 # Latex Preview
 
 Quickly and effortlessly preview Latex equations, save them to a `.gif`
-file, or copy them to clipboard.
+file, copy them to clipboard, or drag them to a document.
 
 ![screenshot in Ubuntu 20.04](screenshot.png)
 
