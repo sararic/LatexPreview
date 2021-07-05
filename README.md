@@ -16,6 +16,8 @@ The following packages are _required_.
 > __Note:__ At the moment, only environments with `nautilus` are 
 > supported for the clipboard. Contributions are welcome so as to 
 > expand this feature for other desktop environments.
+> This only affects pasting the image to a file browser;
+> the program should always work with Libre/Open/MS Office.
 
 ## Installation
 
