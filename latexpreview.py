@@ -138,13 +138,23 @@ class MainWindow:
             "on_color_set": self.on_color_set,
             "on_quit": self.on_quit
         }
-
         self.builder.connect_signals(handlers)
+
+        # initialize properties
         self.resolution_spin = self.builder.get_object("resolution_spin")
         self.editor = self.builder.get_object("editor")
-        self.preview = self.builder.get_object("preview")
         self.color_btn = self.builder.get_object("color_btn")
         self.packages_pop = self.builder.get_object("packages_pop")
+        self.preview = self.builder.get_object("preview")
+
+        # initialize clipboard and drag'n'drop
+        self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        preview_box = self.builder.get_object("preview_box")
+        preview_box.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+            [], Gdk.DragAction.COPY)
+        preview_box.drag_source_add_image_targets()
+        preview_box.connect("drag-data-get", self.on_drag_data_get)
+        preview_box.connect("drag-begin", self.on_drag_begin)
 
         # initialize the packages pop-over
         renderer = Gtk.CellRendererText()
@@ -157,7 +167,6 @@ class MainWindow:
         self.packages_pop.add(packages_tree)
         self.packages.append([ADD_PACK_MSG])
 
-        self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         self.builder.get_object('window').show_all()
 
     def generate(self):
@@ -228,6 +237,13 @@ class MainWindow:
         self.clipboard.set_text(CPY_STRING, -1)
         self.clipboard.set_image(self.preview.get_pixbuf())
         print("Copied /tmp/latexpreview.png to clipboard")
+
+    def on_drag_begin(self, widget, context):
+        widget.drag_source_set_icon_pixbuf(
+            self.preview.get_pixbuf())
+
+    def on_drag_data_get(self, widget, drag_context, data, info, time):
+        data.set_pixbuf(self.preview.get_pixbuf())
 
     def on_quit(self, widget):
         # write the new packages to disk

@@ -214,11 +214,17 @@
           </packing>
         </child>
         <child>
-          <object class="GtkImage" id="preview">
+          <object class="GtkEventBox" id="preview_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="stock">gtk-discard</property>
-            <property name="icon_size">6</property>
+            <child>
+              <object class="GtkImage" id="preview">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-discard</property>
+                <property name="icon_size">6</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
