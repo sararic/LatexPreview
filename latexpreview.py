@@ -141,6 +141,7 @@ class MainWindow:
         self.builder.connect_signals(handlers)
 
         # initialize properties
+        self.state = False # whether we are showing an image or not
         self.resolution_spin = self.builder.get_object("resolution_spin")
         self.editor = self.builder.get_object("editor")
         self.color_btn = self.builder.get_object("color_btn")
@@ -201,6 +202,7 @@ class MainWindow:
         e = call(latex)
         if e is not None:
             self.preview.set_from_icon_name("emblem-unreadable", 6)
+            self.state = False
             return False
         print("converting /tmp/latexpreview.dvi to /tmp/latexpreview.png")
         e = call(dvipng)
@@ -209,6 +211,7 @@ class MainWindow:
                 e.cmd[0], e.returncode, e.output.decode("ascii")))
         # update preview
         self.preview.set_from_file('latexpreview.png')
+        self.state = True
         return True
 
     def on_save(self, widget):
@@ -239,10 +242,12 @@ class MainWindow:
         print("Copied /tmp/latexpreview.png to clipboard")
 
     def on_drag_begin(self, widget, context):
+        if not self.state: return
         widget.drag_source_set_icon_pixbuf(
             self.preview.get_pixbuf())
 
     def on_drag_data_get(self, widget, drag_context, data, info, time):
+        if not self.state: return
         data.set_pixbuf(self.preview.get_pixbuf())
 
     def on_quit(self, widget):
