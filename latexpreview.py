@@ -224,7 +224,9 @@ class MainWindow:
         os.chdir('/tmp/')
 
     def on_copy(self, widget):
+        if not self.generate(): return
         self.clipboard.set_text(CPY_STRING, -1)
+        self.clipboard.set_image(self.preview.get_pixbuf())
         print("Copied /tmp/latexpreview.png to clipboard")
 
     def on_quit(self, widget):
