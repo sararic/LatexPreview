@@ -10,7 +10,6 @@ from gi.repository.GLib import Error as GLibError
 
 import os
 import subprocess
-from multiprocessing import Process
 import json
 
 CWD = os.getcwd()
@@ -20,11 +19,11 @@ ADD_PACK_MSG = "<add a LaTeX package>"
 os.chdir('/tmp/')
 
 TEX_FOOT = r"""
-\end{displaymath}
+$$
 \end{document}
 """
 
-XCLIP_STRING = b"""x-special/nautilus-clipboard
+CPY_STRING = """x-special/nautilus-clipboard
 copy
 file:///tmp/latexpreview.png
 """
@@ -42,7 +41,7 @@ def tex_head(packages):
 
     r += r"""\pagestyle{empty}
 \begin{document}
-\begin{displaymath}
+$$
 """
     return r
 
@@ -147,11 +146,6 @@ class MainWindow:
         self.color_btn = self.builder.get_object("color_btn")
         self.packages_pop = self.builder.get_object("packages_pop")
 
-        # check if xclip is installed
-        r = subprocess.call("command -v xclip >> /dev/null", shell=True)
-        if r:
-            self.builder.get_object("cpy_btn").set_sensitive(False)
-
         # initialize the packages pop-over
         renderer = Gtk.CellRendererText()
         renderer.set_property("editable", True)
@@ -163,7 +157,7 @@ class MainWindow:
         self.packages_pop.add(packages_tree)
         self.packages.append([ADD_PACK_MSG])
 
-        self.clipboard = []
+        self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         self.builder.get_object('window').show_all()
 
     def generate(self):
@@ -174,6 +168,7 @@ class MainWindow:
         """
         latex = [
             "latex",
+            "-output-format=dvi"
             "-interaction=nonstopmode",
             "latexpreview.tex"
         ]
@@ -229,23 +224,8 @@ class MainWindow:
         os.chdir('/tmp/')
 
     def on_copy(self, widget):
-        # xclip needs to run for as long as the selection exists
-        # hence we need to use threading
-        def copy():
-            e = call(
-                ["xclip", "-selection", "clipboard"],
-                XCLIP_STRING
-            )
-            if e is not None:
-                error_dialog("{} terminated with exit status {}:\n{}".format(
-                    e.cmd[0], e.returncode, e.output.decode("ascii")))
-
-        if not self.generate(): return
-
-        selection = Process(target=copy)
-        selection.start()
+        self.clipboard.set_text(CPY_STRING, -1)
         print("Copied /tmp/latexpreview.png to clipboard")
-        self.clipboard.append(selection)
 
     def on_quit(self, widget):
         # write the new packages to disk
@@ -253,10 +233,6 @@ class MainWindow:
         with open(CONF_FILE, 'w') as f:
             self.to_json(f)
 
-        # kill the running xclips and quit Gtk
-        for t in self.clipboard:
-            print("Killing running instance of xclip")
-            t.terminate()
         Gtk.main_quit()
 
     def refresh_packages(self, renderer, path, new_str):

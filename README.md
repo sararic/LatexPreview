@@ -13,11 +13,6 @@ The following packages are _required_.
 * an installation of `latex`
 * `dvipng`
 
-The following package is necessary for copying the image to clipboard
-and use the clipboard across multiple applications. It is however not
-required, and if not installed the feature will simply be disabled.
-* `xclip`
-
 > __Note:__ At the moment, only environments with `nautilus` are 
 > supported for the clipboard. Contributions are welcome so as to 
 > expand this feature for other desktop environments.
