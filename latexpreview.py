@@ -308,7 +308,7 @@ class MainWindow:
         w.resolution_spin.set_value(d['resolution'])
         for p in reversed(d['packages']):
             w.packages.prepend([p])
-
+        w.generate()
         return w
 
 
