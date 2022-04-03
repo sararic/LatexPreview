@@ -225,7 +225,7 @@ class MainWindow:
         if response == Gtk.ResponseType.OK:
             file_path = dialog.get_filename()
             os.rename('/tmp/latexpreview.png', file_path)
-        print(f"Moved /tmp/latexpreview.png to {file_path}")
+            print(f"Moved /tmp/latexpreview.png to {file_path}")
 
         dialog.destroy()
         os.chdir('/tmp/')
