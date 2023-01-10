@@ -1,1 +1,1 @@
-python3 texlive-full python3-gi gobject-introspection gir1.2-gtk-3.0 dvipng
+python3 texlive-science python3-gi gobject-introspection gir1.2-gtk-3.0 dvipng

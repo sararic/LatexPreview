@@ -21,20 +21,29 @@ Alternatively, you can use `docker` to build a docker image
 from the supplied Dockerfile.
 
 ## Installation
-
 Simply clone this repository, or download it.
 ```shell
 $ git clone https://github.com/sbacco/LatexPreview.git
 ```
+### On base system
 If you have all the dependencies installed, you can run the
 program with,
 ```shell
 $ cd LatexPreview
 $ python3 latexpreview.py
 ```
-Otherwise, with docker (this can take a while):
+### With `Docker`
+Edit `requirements.txt` to suit the TeX packages you wish to use.
+By default, only the Debian package `texlive-science` is 
+installed, taking up 1.29GB of disk space.
+Installing `texlive-full` takes up approximately 8GB of disk space.
+
+Create the image:
 ```shell
-$ docker image build --pull --file Dockerfile
+$ cd LatexPreview
+$ docker image build --pull\
+    --file Dockerfile\
+    --tag 'latexpreview:latest' .
 ```
 A helper script is provided to help you run the docker image.
 Make it executable,
