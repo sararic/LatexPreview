@@ -35,7 +35,6 @@ $ python3 latexpreview.py
 Otherwise, with docker (this can take a while):
 ```shell
 $ docker image build --pull --file Dockerfile
-$ chmod +x latexpreview.sh
 ```
 A helper script is provided to help you run the docker image.
 Make it executable,
