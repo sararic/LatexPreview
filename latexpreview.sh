@@ -10,7 +10,7 @@ fi
 xhost +local:root
 docker run --rm\
     --env="DISPLAY"\
-    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw"\
+    --mount type=bind,source=/tmp/.X11-unix,target=/tmp/.X11-unix\
     --mount type=bind,source=$HOME/.latexpreview.json,target=/app/.conf.json\
     latexpreview
 xhost -local:root
