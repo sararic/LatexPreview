@@ -3,7 +3,8 @@
 Quickly and effortlessly preview Latex equations, save them to a `.gif`
 file, copy them to clipboard, or drag them to a document.
 
-![screenshot in Ubuntu 20.04](screenshot.png)
+![screenshot](screenshot1.png)
+![screenshot of the copy-paste feature](screenshot2.png)
 
 ## Dependencies
 
