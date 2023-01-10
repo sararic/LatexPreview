@@ -12,6 +12,13 @@ import os
 import subprocess
 import json
 
+# Set dark GTK theme
+try:
+    settings = Gtk.Settings.get_default()
+    settings.set_property("gtk-application-prefer-dark-theme", True)
+except AttributeError:
+    print("Failed to get GTK settings")
+
 CWD = os.getcwd()
 PATH = os.path.dirname(os.path.realpath(__file__))
 CONF_FILE = os.path.join(PATH, '.conf.json')
