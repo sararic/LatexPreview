@@ -25,6 +25,7 @@ Simply clone this repository, or download it.
 ```shell
 $ git clone https://github.com/sbacco/LatexPreview.git
 ```
+
 ### On base system
 If you have all the dependencies installed, you can run the
 program with,
@@ -32,6 +33,7 @@ program with,
 $ cd LatexPreview
 $ python3 latexpreview.py
 ```
+
 ### With `Docker`
 Edit `requirements.txt` to suit the TeX packages you wish to use.
 By default, only the Debian package `texlive-science` is 
@@ -54,6 +56,11 @@ And run the app like so,
 ```shell
 $ ./latexpreview.sh
 ```
+> ***Note:*** Only `X11` is currently supported in the helper script.
+> I don't know how to bind the display in `Wayland`, let alone Windows
+> or MacOS, so if that is what you're into, you will have to figure
+> that out on your own currently.
+
 ## Use
 
 Every control is pretty much intuitive. Hover the mouse over a button
