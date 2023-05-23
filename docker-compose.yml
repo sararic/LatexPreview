@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  app:
+    image: latexpreview:latest
+    build: .
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      - type: bind
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
+      - type: bind
+        source: $HOME/.latexpreview.json
+        target: /app/.conf.json
+    network_mode: host

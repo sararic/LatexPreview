@@ -34,32 +34,30 @@ $ cd LatexPreview
 $ python3 latexpreview.py
 ```
 
-### With `Docker`
+### With `docker-compose`, under `X11`
 Edit `requirements.txt` to suit the TeX packages you wish to use.
 By default, only the Debian package `texlive-science` is 
 installed, taking up 1.29GB of disk space.
 Installing `texlive-full` takes up approximately 8GB of disk space.
 
-Create the image:
+Ensure that you allow connections to your host's display from your internal network:
+```shell
+$ xhost +local:root
+```
+Create the docker image:
 ```shell
 $ cd LatexPreview
-$ docker image build --pull\
-    --file Dockerfile\
-    --tag 'latexpreview:latest' .
-```
-A helper script is provided to help you run the docker image.
-Make it executable,
-```shell
-$ chmod +x latexpreview.sh
+$ docker-compose build
+$ docker-compose up
 ```
 And run the app like so,
 ```shell
-$ ./latexpreview.sh
+$ docker-compose start
 ```
-> ***Note:*** Only `X11` is currently supported in the helper script.
-> I don't know how to bind the display in `Wayland`, let alone Windows
-> or MacOS, so if that is what you're into, you will have to figure
-> that out on your own currently.
+> ***Note:*** On systems not running on `X11`, it is still possible
+> to run a local `XServer` and connect the app.
+The file `docker-compose.yml` needs to be edited to suit your needs.
+Instructions for Windows are coming soon.
 
 ## Use
 
