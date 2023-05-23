@@ -23,6 +23,7 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+*.png
 LICENSE
 README.md
 latexpreview.sh
