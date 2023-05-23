@@ -9,6 +9,7 @@ from gi.repository import Gtk, Gdk
 from gi.repository.GLib import Error as GLibError
 
 import os
+import shutil
 import subprocess
 import json
 
@@ -231,7 +232,7 @@ class MainWindow:
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             file_path = dialog.get_filename()
-            os.rename('/tmp/latexpreview.png', file_path)
+            shutil.copy('/tmp/latexpreview.png', file_path)
             print(f"Moved /tmp/latexpreview.png to {file_path}")
 
         dialog.destroy()
