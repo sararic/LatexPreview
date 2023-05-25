@@ -44,9 +44,11 @@ Ensure that you allow connections to your host's display from your internal netw
 ```shell
 $ xhost +local:root
 ```
-Create the docker image:
+Create the docker image, and a configuration file:
 ```shell
 $ cd LatexPreview
+$ touch ~/.latexpreview.json
+$ chmod 666 ~/.latexpreview.json
 $ docker-compose build
 $ docker-compose up
 ```

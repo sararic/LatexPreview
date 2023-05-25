@@ -308,7 +308,11 @@ class MainWindow:
     def from_json(cls, file):
         w = cls()
         buffer = Gtk.TextBuffer()
-        d = json.load(file)
+        try:
+            d = json.load(file)
+        except json.JSONDecodeError:
+            print(f"File corrupted: {CONF_FILE} (This is fine)")
+            return w
 
         buffer.set_text(d['code'])
         w.editor.set_buffer(buffer)
