@@ -8,6 +8,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from gi.repository.GLib import Error as GLibError
 
+from typing import Iterable
 import os
 import shutil
 import subprocess
@@ -31,8 +32,29 @@ $$
 \end{document}
 """
 
+# handlers and objects as defined in the UI file
+HANDLERS = [
+    "on_save",
+    "on_copy",
+    "on_resolution_changed",
+    "on_preview",
+    "on_log",
+    "on_packages",
+    "on_color_set",
+    "on_quit"
+]
+OBJS = [
+    "resolution_spin",
+    "editor",
+    "color_btn",
+    "packages_pop",
+    "preview",
+    "preview_box",
+    "window"
+]
 
-def tex_head(packages):
+
+def tex_head(packages: Iterable[str]) -> str:
     """
     Compute the appropriate header given a list of packages
     """
@@ -49,7 +71,7 @@ $$
     return r
 
 
-def call(command: list, stdin = ""):
+def call(command: list[str], stdin: str = "") -> Exception | None:
     """Call an external program"""
     print("Calling subprocess:", end=' ')
     for s in command:
@@ -69,7 +91,7 @@ def call(command: list, stdin = ""):
     return None
 
 
-def strip(string):
+def strip(string: str) -> str:
     """
     LaTeX doesn't like empty lines at the start and end of mathematical
     expressions for some reason, so we must strip those away.
@@ -82,7 +104,7 @@ def strip(string):
     return string
 
 
-def error_dialog(e):
+def error_dialog(e: str) -> None:
     dialog = Gtk.MessageDialog(
         parent                 = None,
         message_type           = Gtk.MessageType.ERROR,
@@ -120,45 +142,31 @@ class LogWindow(Gtk.Window):
 
 
 class MainWindow:
-    def __init__(self):
-        # load up builder
-        self.builder = Gtk.Builder()
-        try: self.builder.add_from_file(
+    def __init__(self) -> None:
+        # load up UI
+        builder = Gtk.Builder()
+        try: builder.add_from_file(
                 os.path.join(PATH, "latexpreview.ui"))
         except GLibError as e:
             error_dialog(e)
             self.good = False
             return
         self.good = True
+        builder.connect_signals(
+            {k: getattr(self, k) for k in HANDLERS}
+        )
+        for p in OBJS:
+            setattr(self, p, builder.get_object(p))
 
-        handlers = {
-            "on_save": self.on_save,
-            "on_copy": self.on_copy,
-            "on_resolution_changed": self.on_resolution_changed,
-            "on_preview": self.on_preview,
-            "on_log": self.on_log,
-            "on_packages": self.on_packages,
-            "on_color_set": self.on_color_set,
-            "on_quit": self.on_quit
-        }
-        self.builder.connect_signals(handlers)
-
-        # initialize properties
         self.state = False # whether we are showing an image or not
-        self.resolution_spin = self.builder.get_object("resolution_spin")
-        self.editor = self.builder.get_object("editor")
-        self.color_btn = self.builder.get_object("color_btn")
-        self.packages_pop = self.builder.get_object("packages_pop")
-        self.preview = self.builder.get_object("preview")
 
         # initialize clipboard and drag'n'drop
         self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        preview_box = self.builder.get_object("preview_box")
-        preview_box.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+        self.preview_box.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
             [], Gdk.DragAction.COPY)
-        preview_box.drag_source_add_image_targets()
-        preview_box.connect("drag-data-get", self.on_drag_data_get)
-        preview_box.connect("drag-begin", self.on_drag_begin)
+        self.preview_box.drag_source_add_image_targets()
+        self.preview_box.connect("drag-data-get", self.on_drag_data_get)
+        self.preview_box.connect("drag-begin", self.on_drag_begin)
 
         # initialize the packages pop-over
         renderer = Gtk.CellRendererText()
@@ -171,9 +179,9 @@ class MainWindow:
         self.packages_pop.add(packages_tree)
         self.packages.append([ADD_PACK_MSG])
 
-        self.builder.get_object('window').show_all()
+        self.window.show_all()
 
-    def generate(self):
+    def generate(self) -> bool:
         """
         Generate the preview
         Return True if the compilation was successful,
@@ -217,7 +225,7 @@ class MainWindow:
         self.state = True
         return True
 
-    def on_save(self, widget):
+    def on_save(self, widget) -> None:
         if not self.generate(): return
 
         os.chdir(CWD) # so we don't pop up in the /tmp folder
@@ -238,21 +246,21 @@ class MainWindow:
         dialog.destroy()
         os.chdir('/tmp/')
 
-    def on_copy(self, widget):
+    def on_copy(self, widget) -> None:
         if not self.generate(): return
         self.clipboard.set_image(self.preview.get_pixbuf())
         print("Copied /tmp/latexpreview.png to clipboard")
 
-    def on_drag_begin(self, widget, context):
+    def on_drag_begin(self, widget, context) -> None:
         if not self.state: return
         widget.drag_source_set_icon_pixbuf(
             self.preview.get_pixbuf())
 
-    def on_drag_data_get(self, widget, drag_context, data, info, time):
+    def on_drag_data_get(self, widget, drag_context, data, info, time) -> None:
         if not self.state: return
         data.set_pixbuf(self.preview.get_pixbuf())
 
-    def on_quit(self, widget):
+    def on_quit(self, widget) -> None:
         # write the new packages to disk
         print(f"Saving application state to {CONF_FILE}")
         with open(CONF_FILE, 'w') as f:
@@ -260,7 +268,7 @@ class MainWindow:
 
         Gtk.main_quit()
 
-    def refresh_packages(self, renderer, path, new_str):
+    def refresh_packages(self, renderer, path, new_str) -> None:
         idx = int(path)
         it = self.packages.get_iter_from_string(path)
         if new_str.isspace() or not new_str:
@@ -272,23 +280,23 @@ class MainWindow:
             self.packages.append([ADD_PACK_MSG])
         self.packages.set_value(it, 0, new_str)
 
-    def on_resolution_changed(self, widget):
+    def on_resolution_changed(self, widget) -> None:
         self.generate()
 
-    def on_preview(self, widget):
+    def on_preview(self, widget) -> None:
         self.generate()
 
-    def on_log(self, widget):
+    def on_log(self, widget) -> None:
         w = LogWindow()
         w.show_all()
 
-    def on_color_set(self, widget):
+    def on_color_set(self, widget) -> None:
         self.generate()
 
-    def on_packages(self, widget):
+    def on_packages(self, widget) -> None:
         self.packages_pop.show_all()
 
-    def to_json(self, file):
+    def to_json(self, file: str) -> None:
         d = {}
         buff = self.editor.get_buffer()
         d['code'] = buff.get_text(
@@ -305,7 +313,7 @@ class MainWindow:
         json.dump(d, file)
 
     @classmethod
-    def from_json(cls, file):
+    def from_json(cls, file: str):
         w = cls()
         buffer = Gtk.TextBuffer()
         try:
