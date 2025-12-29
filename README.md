@@ -23,7 +23,7 @@ from the supplied Dockerfile.
 ## Installation
 Simply clone this repository, or download it.
 ```shell
-$ git clone https://github.com/sbacco/LatexPreview.git
+$ git clone https://github.com/sararic/LatexPreview.git
 ```
 
 ### On base system
